@@ -1,14 +1,18 @@
 /* Copyright (c) 2021 DeflatedPickle under the CC0 license */
 
-@file:Suppress("unused")
+@file:Suppress("unused", "CAST_NEVER_SUCCEEDS")
 
 package com.deflatedpickle.thisisfine.mixins
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap
+import net.minecraft.block.AbstractFireBlock
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.FireBlock
+import net.minecraft.block.FluidBlock
 import net.minecraft.block.TntBlock
 import net.minecraft.server.world.ServerWorld
+import net.minecraft.state.property.Properties
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.BlockView
@@ -21,10 +25,12 @@ import org.spongepowered.asm.mixin.Overwrite
 import org.spongepowered.asm.mixin.Shadow
 import java.util.Random
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 @Mixin(FireBlock::class)
 abstract class MixinFireBlock {
-    @Shadow abstract fun getSpreadChance(state: BlockState): Int
+    @Shadow lateinit var spreadChances: Object2IntMap<Block>
+
     @Shadow abstract fun getStateWithAge(world: WorldAccess, pos: BlockPos, age: Int): BlockState?
     @Shadow abstract fun isRainingAround(world: World, pos: BlockPos): Boolean
     @Shadow abstract fun isFlammable(state: BlockState?): Boolean
@@ -34,21 +40,32 @@ abstract class MixinFireBlock {
     fun areBlocksAroundFlammable(world: BlockView, pos: BlockPos) = true
 
     @Overwrite
+    fun getSpreadChance(state: BlockState) =
+        if (state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED)) 0
+        else if (
+            state.block is AbstractFireBlock ||
+            state.block is FluidBlock ||
+            state.block.blastResistance > 100
+        ) 0
+        else if (state.block in this.spreadChances) this.spreadChances.getInt(state.block)
+        else 100 - (state.block.settings.hardness / 10).roundToInt() - (state.block.settings.resistance).roundToInt()
+
+    @Overwrite
     // mostly copied from vanilla
     // edited to stop floating fire spread
     open fun scheduledTick(state: BlockState, world: ServerWorld, pos: BlockPos, random: Random) {
-        var state = state
+        var tempState = state
         var blockPos: Boolean
         world.createAndScheduleBlockTick(pos, (this as Block), FireBlock.getFireTickDelay(world.random))
         if (!world.gameRules.getBoolean(GameRules.DO_FIRE_TICK)) {
             return
         }
-        if (!state.canPlaceAt(world, pos)) {
+        if (!tempState.canPlaceAt(world, pos)) {
             world.removeBlock(pos, false)
         }
         val blockState = world.getBlockState(pos.down())
         val bl = blockState.isIn(world.dimension.infiniburnBlocks)
-        val i = state.get(FireBlock.AGE)
+        val i = tempState.get(FireBlock.AGE)
         if (!bl && world.isRaining && this.isRainingAround(
                 world,
                 pos
@@ -59,8 +76,8 @@ abstract class MixinFireBlock {
         }
         val j = min(15, i + random.nextInt(3) / 2)
         if (i != j) {
-            state = state.with(FireBlock.AGE, j) as BlockState
-            world.setBlockState(pos, state, Block.NO_REDRAW)
+            tempState = tempState.with(FireBlock.AGE, j) as BlockState
+            world.setBlockState(pos, tempState, Block.NO_REDRAW)
         }
         if (!bl) {
             if (!areBlocksAroundFlammable(world, pos)) {

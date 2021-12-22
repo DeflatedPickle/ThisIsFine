@@ -1,9 +1,7 @@
 accessWidener	v1	named
 
-accessible    field    net/minecraft/block/FireBlock    spreadChances    Lit/unimi/dsi/fastutil/objects/Object2IntMap;
 accessible    method    net/minecraft/block/FireBlock    getFireTickDelay    (Ljava/util/Random;)I
 
-# accessible    field    net/minecraft/block/AbstractBlock    material    Lnet/minecraft/block/Material;
 accessible    field    net/minecraft/block/AbstractBlock    settings    Lnet/minecraft/block/AbstractBlock$Settings;
 
 accessible    field    net/minecraft/block/AbstractBlock$Settings    resistance    F
