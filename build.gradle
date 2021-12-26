@@ -67,8 +67,8 @@ spotless {
 
 	java {
 		importOrder()
-		removeUnusedImports()
-		googleJavaFormat()
+		// removeUnusedImports()
+		// googleJavaFormat()
 
 		licenseHeader "/* ${expand_license(license_header)} */\n\n"
 	}
