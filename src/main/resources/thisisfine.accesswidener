@@ -3,7 +3,7 @@ accessWidener	v1	named
 accessible    method    net/minecraft/block/AbstractFireBlock    isFlammable    (Lnet/minecraft/block/BlockState;)Z
 
 accessible    field    net/minecraft/block/FireBlock    spreadChances    Lit/unimi/dsi/fastutil/objects/Object2IntMap;
-accessible    method    net/minecraft/block/FireBlock    getFireTickDelay    (Ljava/util/Random;)I
+accessible    method    net/minecraft/block/FireBlock    getFireTickDelay (Ljava/util/Random;)I
 accessible    method    net/minecraft/block/FireBlock    getBurnChance    (Lnet/minecraft/world/WorldView;Lnet/minecraft/util/math/BlockPos;)I
 accessible    method    net/minecraft/block/FireBlock    isRainingAround    (Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z
 accessible    method    net/minecraft/block/FireBlock    areBlocksAroundFlammable    (Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z

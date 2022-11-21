@@ -1,8 +1,7 @@
-/* Copyright (c) 2021 DeflatedPickle under the CC0 license */
+/* Copyright (c) 2021-2022 DeflatedPickle under the MIT license */
 
 package com.deflatedpickle.thisisfine
 
-import net.fabricmc.api.ModInitializer
 import net.minecraft.block.AbstractFireBlock
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -15,6 +14,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.GameRules
 import net.minecraft.world.World
+import org.quiltmc.loader.api.ModContainer
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer
 import org.spongepowered.asm.mixin.Overwrite
 import java.util.Random
 import kotlin.math.min
@@ -28,7 +29,7 @@ object ThisIsFine : ModInitializer {
     private const val AUTHOR = "$[author]"
     private const val VERSION = "$[version]"
 
-    override fun onInitialize() {
+    override fun onInitialize(mod: ModContainer) {
         println(listOf(MOD_ID, NAME, GROUP, AUTHOR, VERSION))
     }
 
@@ -47,7 +48,7 @@ object ThisIsFine : ModInitializer {
     fun scheduledTick(fireBlock: FireBlock, state: BlockState, world: ServerWorld, pos: BlockPos, random: Random) {
         var tempState = state
         var blockPos: Boolean
-        world.createAndScheduleBlockTick(pos, fireBlock, FireBlock.getFireTickDelay(world.random))
+        world.scheduleBlockTick(pos, fireBlock, FireBlock.getFireTickDelay(world.random))
         if (!world.gameRules.getBoolean(GameRules.DO_FIRE_TICK)) {
             return
         }
