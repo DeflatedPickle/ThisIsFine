@@ -12,12 +12,12 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.state.property.Properties
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import net.minecraft.util.random.RandomGenerator
 import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import org.quiltmc.loader.api.ModContainer
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer
 import org.spongepowered.asm.mixin.Overwrite
-import java.util.Random
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -45,7 +45,7 @@ object ThisIsFine : ModInitializer {
 
     // mostly copied from vanilla
     // edited to stop floating fire spread
-    fun scheduledTick(fireBlock: FireBlock, state: BlockState, world: ServerWorld, pos: BlockPos, random: Random) {
+    fun scheduledTick(fireBlock: FireBlock, state: BlockState, world: ServerWorld, pos: BlockPos, random: RandomGenerator) {
         var tempState = state
         var blockPos: Boolean
         world.scheduleBlockTick(pos, fireBlock, FireBlock.getFireTickDelay(world.random))
@@ -56,7 +56,7 @@ object ThisIsFine : ModInitializer {
             world.removeBlock(pos, false)
         }
         val blockState = world.getBlockState(pos.down())
-        val bl = blockState.isIn(world.dimension.infiniburnBlocks)
+        val bl = blockState.isIn(world.dimension.infiniburn)
         val i = tempState.get(FireBlock.AGE)
         if (!bl && world.isRaining && fireBlock.isRainingAround(
                 world,
@@ -121,7 +121,7 @@ object ThisIsFine : ModInitializer {
                         o += (n - 1) * 100
                     }
                     mutable[pos, l, n] = m
-                    val p: Int = fireBlock.getBurnChance(world, mutable)
+                    val p: Int = fireBlock.getBurnChance(state)
                     if (p <= 0) continue
                     var q = (p + 40 + world.difficulty.id * 7) / (i + 30)
                     if (blockPos) {
@@ -142,7 +142,7 @@ object ThisIsFine : ModInitializer {
     @Overwrite
     // mostly copied from vanilla
     // edited to stop fire spreading into blocks
-    fun trySpreadingFire(fireBlock: FireBlock, world: World, pos: BlockPos, spreadFactor: Int, rand: Random, currentAge: Int) {
+    fun trySpreadingFire(fireBlock: FireBlock, world: World, pos: BlockPos, spreadFactor: Int, rand: RandomGenerator, currentAge: Int) {
         val i: Int = this.getSpreadChance(fireBlock, world.getBlockState(pos))
         if (rand.nextInt(spreadFactor) < i) {
             val blockState = world.getBlockState(pos)
